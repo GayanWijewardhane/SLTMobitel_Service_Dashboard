@@ -1,0 +1,24 @@
+{
+  "name": "sr-dashboard-mern",
+  "version": "1.0.0",
+  "description": "Service Request Dashboard - MERN Stack",
+  "main": "server/server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "start": "concurrently \"npm run server:start\" \"npm run client:build\"",
+    "server:dev": "cd server && npm run dev",
+    "server:start": "cd server && npm start",
+    "client:dev": "cd client && npm run dev",
+    "client:build": "cd client && npm run build",
+    "client:preview": "cd client && npm run preview",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "seed": "cd server && npm run seed",
+    "production": "cd server && NODE_ENV=production npm start"
+  },
+  "keywords": ["mern", "dashboard", "service-request", "mongodb", "express", "react", "nodejs"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
