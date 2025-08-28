@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import ProfileDialog from '../Profile/ProfileDialog';
+import ChangePasswordDialog from '../Profile/ChangePasswordDialog';
 import {
   Box,
   AppBar,
@@ -34,6 +36,8 @@ const drawerWidth = 280;
 const DashboardLayout = ({ children, currentTab, onTabChange }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const { user, logout } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -194,18 +198,18 @@ const DashboardLayout = ({ children, currentTab, onTabChange }) => {
               transformOrigin={{ horizontal: 'right', vertical: 'top' }}
               anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
-              <MenuItem onClick={() => {handleMenuClose(); alert('Profile feature coming soon!'); }}>
-                <ListItemIcon>
+              <MenuItem onClick={() => { handleMenuClose(); setProfileOpen(true); }}>
+                 <ListItemIcon>
                   <AccountCircle fontSize="small" />
-                </ListItemIcon>
-                Profile
+                 </ListItemIcon>
+                 Profile
               </MenuItem>
-              <MenuItem onClick={() => {handleMenuClose(); alert('Change password feature coming soon!'); }}>
+              <MenuItem onClick={() => { handleMenuClose(); setChangePasswordOpen(true); }}>
                 <ListItemIcon>
-                  <Lock fontSize="small" />
+                   <Lock fontSize="small" />
                 </ListItemIcon>
                 Change Password
-              </MenuItem>
+               </MenuItem>
               <Divider />
               <MenuItem onClick={handleLogout}>
                 <ListItemIcon>
@@ -213,7 +217,8 @@ const DashboardLayout = ({ children, currentTab, onTabChange }) => {
                 </ListItemIcon>
                 Logout
               </MenuItem>
-            </Menu>
+           
+             </Menu>
           </Box>
         </Toolbar>
       </AppBar>
@@ -271,6 +276,15 @@ const DashboardLayout = ({ children, currentTab, onTabChange }) => {
           {children}
         </Box>
       </Box>
+     <ProfileDialog 
+  open={profileOpen} 
+  onClose={() => setProfileOpen(false)} 
+/>
+
+<ChangePasswordDialog 
+  open={changePasswordOpen} 
+  onClose={() => setChangePasswordOpen(false)} 
+/>
     </Box>
   );
 };

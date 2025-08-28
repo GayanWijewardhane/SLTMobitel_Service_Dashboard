@@ -44,7 +44,7 @@ const seedUsers = async () => {
     for (const userData of users) {
       const user = new User(userData);
       await user.save();
-      console.log(Created user: ${user.username} (${user.role}));
+      console.log(`Created user: ${user.username} (${user.role})`);
     }
 
     console.log('Users seeded successfully!');

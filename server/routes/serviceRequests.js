@@ -60,14 +60,13 @@ router.get('/', getServiceRequests);
 router.get('/:id', getServiceRequest);
 
 // @route   POST /api/requests
-router.post('/', createServiceRequest);
-
+router.post('/', upload.single('rcaFile'), createServiceRequest);
 // @route   PUT /api/requests/:id
-router.put('/:id', updateServiceRequest);
-
+router.put('/:id', upload.single('rcaFile'), updateServiceRequest);
 // @route   DELETE /api/requests/:id
 router.delete('/:id', deleteServiceRequest);
 
+      
 // @route   POST /api/upload-rca
 router.post('/upload-rca', upload.single('rcaFile'), (req, res) => {
   try {

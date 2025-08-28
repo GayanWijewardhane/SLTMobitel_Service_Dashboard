@@ -1,7 +1,7 @@
 const ServiceRequest = require('../models/ServiceRequest');
 const path = require('path');
 const fs = require('fs');
-
+const emailService = require('../services/emailService');
 // @desc    Get all service requests
 // @route   GET /api/requests
 // @access  Private
@@ -93,12 +93,25 @@ const createServiceRequest = async (req, res) => {
     req.body.createdBy = req.user.id;
     req.body.updatedBy = req.user.id;
 
+        // Handle file upload
+    if (req.file) {
+      req.body.rcaFilePath = `/uploads/${req.file.filename}`;
+    }
+
     const request = new ServiceRequest(req.body);
     await request.save();
 
     // Populate user info for response
     await request.populate('createdBy', 'username');
     await request.populate('updatedBy', 'username');
+
+     // Send email notification
+    try {
+      await emailService.sendNewRequestNotification(request, req.user.username);
+    } catch (emailError) {
+      console.error('Failed to send email notification:', emailError);
+      // Don't fail the request creation if email fails
+    }   
 
     res.status(201).json({
       success: true,
@@ -130,6 +143,20 @@ const updateServiceRequest = async (req, res) => {
   try {
     // Add updated by user info
     req.body.updatedBy = req.user.id;
+     
+     // Handle file upload
+    if (req.file) {
+      req.body.rcaFilePath = `/uploads/${req.file.filename}`;
+
+      // If a new file is uploaded, delete the old one
+      const oldRequest = await ServiceRequest.findById(req.params.id);
+      if (oldRequest && oldRequest.rcaFilePath) {
+        const oldFilePath = path.join(__dirname, '../..', oldRequest.rcaFilePath);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      }
+    }
 
     const request = await ServiceRequest.findByIdAndUpdate(
       req.params.id,
