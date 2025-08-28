@@ -80,26 +80,51 @@ export const AuthProvider = ({ children }) => {
   axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';
 
   // Check if user is authenticated on app load
-  useEffect(() => {
+useEffect(() => {
+  // Only check auth if we have a token or we're not on login page
+  const token = localStorage.getItem('token');
+  const isLoginPage = window.location.pathname === '/login';
+  
+  if (token || !isLoginPage) {
     checkAuth();
-  }, []);
+  } else {
+    // We're on login page with no token, just set loading to false
+    dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+  }
+}, []);
+const checkAuth = async () => {
+  try {
+    // Don't check auth if we're on the login page
+    if (window.location.pathname === '/login') {
+      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+      return;
+    }
 
-  const checkAuth = async () => {
-    try {
-      const response = await axios.get('/api/auth/me');
-      if (response.data.success) {
-        dispatch({
-          type: AUTH_ACTIONS.LOGIN_SUCCESS,
-          payload: response.data.user,
-        });
-      }
-    } catch (error) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await axios.get('/api/auth/me');
+    if (response.data.success) {
       dispatch({
-        type: AUTH_ACTIONS.LOGOUT,
+        type: AUTH_ACTIONS.LOGIN_SUCCESS,
+        payload: response.data.user,
       });
     }
-  };
-
+  } catch (error) {
+    // Only log errors if we're not on the login page
+    if (window.location.pathname !== '/login') {
+      console.log('Authentication check failed:', error.response?.status);
+    }
+    
+    localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
+    dispatch({
+      type: AUTH_ACTIONS.LOGOUT,
+    });
+  }
+};
   const login = async (username, password) => {
     try {
       dispatch({ type: AUTH_ACTIONS.LOGIN_START });
@@ -142,8 +167,7 @@ export const AuthProvider = ({ children }) => {
       toast.success('Logged out');
     }
   };
-
-  const changePassword = async (currentPassword, newPassword) => {
+   const changePassword = async (currentPassword, newPassword) => {
     try {
       const response = await axios.put('/api/auth/change-password', {
         currentPassword,
@@ -162,6 +186,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  
   const clearError = () => {
     dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
   };
