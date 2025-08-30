@@ -141,23 +141,28 @@ const createServiceRequest = async (req, res) => {
 // @access  Private
 const updateServiceRequest = async (req, res) => {
   try {
+    // Get the current request to compare status
+    const currentRequest = await ServiceRequest.findById(req.params.id);
+    if (!currentRequest) {
+      return res.status(404).json({ success: false, message: 'Service request not found' });
+    }
+    const oldStatus = currentRequest.status;
+
     // Add updated by user info
     req.body.updatedBy = req.user.id;
-     
-     // Handle file upload
+
+    // Handle file upload (if applicable, your previous logic here)
     if (req.file) {
       req.body.rcaFilePath = `/uploads/${req.file.filename}`;
-
-      // If a new file is uploaded, delete the old one
-      const oldRequest = await ServiceRequest.findById(req.params.id);
-      if (oldRequest && oldRequest.rcaFilePath) {
-        const oldFilePath = path.join(__dirname, '../..', oldRequest.rcaFilePath);
+      if (currentRequest.rcaFilePath) {
+        const oldFilePath = path.join(__dirname, '../..', currentRequest.rcaFilePath);
         if (fs.existsSync(oldFilePath)) {
           fs.unlinkSync(oldFilePath);
         }
       }
     }
 
+    // Update request
     const request = await ServiceRequest.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -165,11 +170,17 @@ const updateServiceRequest = async (req, res) => {
     ).populate('createdBy', 'username')
      .populate('updatedBy', 'username');
 
-    if (!request) {
-      return res.status(404).json({
-        success: false,
-        message: 'Service request not found'
-      });
+    if (oldStatus !== request.status) {
+      try {
+        await emailService.sendStatusUpdateNotification(
+          request,
+          oldStatus,
+          request.status,
+          req.user.username
+        );
+      } catch (emailError) {
+        console.error('Failed to send status update email:', emailError);
+      }
     }
 
     res.json({
@@ -177,21 +188,15 @@ const updateServiceRequest = async (req, res) => {
       data: request,
       message: 'Service request updated successfully'
     });
-
   } catch (error) {
     console.error('Update request error:', error);
-    
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
         message: 'Service request number already exists'
       });
     }
-
-    res.status(500).json({
-      success: false,
-      message: 'Error updating service request'
-    });
+    res.status(500).json({ success: false, message: 'Error updating service request' });
   }
 };
 

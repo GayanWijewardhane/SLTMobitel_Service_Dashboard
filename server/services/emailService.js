@@ -102,12 +102,25 @@ async initializeTransporter() {
             <h3 style="color: #0054a6; margin-top: 20px;">Description</h3>
             <p style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #8dc63f;">${request.description}</p>
           ` : ''}
+<div style="text-align: center; margin-top: 30px;">
+  <table border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td align="center" bgcolor="#0054a6" style="border-radius: 4px;">
+        <a href="http://172.22.97.21:5173" 
+           target="_blank"
+           style="font-size: 16px; 
+                  font-family: Arial, sans-serif; 
+                  color: #ffffff; 
+                  text-decoration: none; 
+                  padding: 12px 24px; 
+                  display: inline-block;">
+          View Dashboard
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
 
-          <div style="text-align: center; margin-top: 30px;">
-            <a href="http://172.22.97.21:5173" style="background: linear-gradient(135deg, #0054a6, #8dc63f); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
-              View Dashboard
-            </a>
-          </div>
         </div>
         
         <div style="background: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 12px;">
